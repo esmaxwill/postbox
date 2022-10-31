@@ -1,4 +1,5 @@
 service: postbox
+variablesResolutionMode: "20210326"
 
 custom:
   customDomain:
@@ -25,15 +26,18 @@ provider:
   timeout: 30
   stage: test
   endpointType: REGIONAL
-  tracing:
-    lambda: true
+  lambdaHashingVersion: "20201221"
+  httpApi:
+    disableDefaultEndpoint: true
+  # tracing:
+  #   lambda: true
 
   memorySize: 1536
 
   environment:
     PYTHON_PATH: "/var/run/task"
-    SENTRY_DSN: ${env:SENTRY_DSN}
-    SENTRY_RELEASE: ${env:SENTRY_RELEASE}
+    # SENTRY_DSN: ${env:SENTRY_DSN}
+    # SENTRY_RELEASE: ${env:SENTRY_RELEASE}
     ENVIRONMENT: ${opt:stage, "test"}
     DYNAMODB_TABLE_NAME: !Ref StdbTable
     S3_BUCKET_NAME: !Ref DataBucket
@@ -41,6 +45,78 @@ provider:
     AUTHORIZATION_REALMS: ${env:AUTHORIZATION_REALMS, ""}
     AUTHORIZATION_AUDIENCE: ${env:AUTHORIZATION_AUDIENCE, ""}
 
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ses:SendRawEmail
+          Resource:
+            - "arn:aws:ses:us-east-1:${aws:accountId}:identity/*"
+
+        - Effect: Allow
+          Action:
+            - "dynamodb:DescribeTable"
+            - "dynamodb:Scan"
+            - "dynamodb:Query"
+            - "dynamodb:GetItem"
+            - "dynamodb:PutItem"
+            - "dynamodb:UpdateItem"
+            - "dynamodb:DeleteItem"
+          Resource:
+            - !GetAtt StdbTable.Arn
+            - !Join ["/", [!GetAtt StdbTable.Arn, "index/*"]]
+        
+        - Effect: Allow
+          Action:
+            - "s3:ListBucket"
+          Resource: !Join
+            - ""
+            - - "arn:aws:s3:::"
+              - !Ref DataBucket
+              - "/"
+
+        - Effect: Allow
+          Action:
+            - "s3:HeadObject"
+            - "s3:GetObject*"
+            - "s3:DeleteObject"
+          Resource: !Join
+            - ""
+            - - "arn:aws:s3:::"
+              - !Ref DataBucket
+              - "/*"
+
+
+package:
+  patterns:
+    - "!./**"
+    - "postbox/**"
+    - "web_handler.py"
+    - "ses_handler.py"
+
+
+
+functions:
+  api:
+    # provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY_API, '1'}
+    handler: web.handler
+    events:
+      - httpApi:
+          path: "/{proxy+}"
+          method: "*"
+
+  email:
+    handler: ses_handler.handler
+    # provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY_SES, '1'}
+
+  received:
+    handler: ses_handler.sns_handler
+    # provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY_SES, '1'}
+    events:
+      - sns:
+          arn: !Ref ReceiveMailTopic
+          topicName: postbox-mail-received-${opt:stage}
 
 plugins:
   - serverless-python-requirements
