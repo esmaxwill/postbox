@@ -192,6 +192,14 @@ dnspython = ">=1.15.0"
 idna = ">=2.0.0"
 
 [[package]]
+name = "english-words"
+version = "1.1.0"
+description = "Contains sets of english words"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "executing"
 version = "0.10.0"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -467,7 +475,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f9431f8deb9d25742096017ef51968ef4e41f4930364ea8660759f966e12f1bd"
+content-hash = "701ed2e8ac15afd0c4b41b0f93a9b0a448ed3a2352caf98b50a7f96c3616f4a3"
 
 [metadata.files]
 aiodynamo = []
@@ -490,6 +498,7 @@ dnspython = [
     {file = "dnspython-2.2.1.tar.gz", hash = "sha256:0f7569a4a6ff151958b64304071d370daa3243d15941a7beedf0c9fe5105603e"},
 ]
 email-validator = []
+english-words = []
 executing = []
 fastapi = []
 h11 = [

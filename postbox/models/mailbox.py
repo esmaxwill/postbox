@@ -3,6 +3,7 @@ import typing
 
 import pydantic
 
+from postbox import utils
 
 class AntispamSettings(pydantic.BaseModel):
     check_spam: bool = True
@@ -13,6 +14,8 @@ class AntispamSettings(pydantic.BaseModel):
 
 
 class Postbox(pydantic.BaseModel, validate_all=True, validate_assignment=True):
+    id: str = pydantic.Field(default_factory=utils.get_random_postbox_id)
+    
     enabled: bool = True
     created_at: datetime = pydantic.Field(default_factory=datetime.utcnow)
 
