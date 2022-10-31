@@ -11,7 +11,9 @@ class AuthorizationConfig(pydantic.BaseSettings):
     issuers: Set[pydantic.AnyHttpUrl] = pydantic.Field(
         set(), env="AUTHORIZATION_ISSUERS"
     )
-    audience: str = pydantic.Field("urn:eric.smaxwill:postbox", env="AUTHORIZATION_AUDIENCE")
+    audience: str = pydantic.Field(
+        "urn:eric.smaxwill:postbox", env="AUTHORIZATION_AUDIENCE"
+    )
 
 
 class Config(pydantic.BaseSettings):
@@ -42,7 +44,7 @@ class Config(pydantic.BaseSettings):
 
 _default_authorization = AuthorizationConfig(
     realms={"devportal"},
-    issuers={"https://passport.smaxwill.com/devportal"}, # type: ignore
+    issuers={"https://passport.smaxwill.com/devportal"},  # type: ignore
     audience="urn:eric.smaxwill:postbox",
 )
 
