@@ -1,0 +1,26 @@
+{
+  "name": "postbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esmaxwill/postbox.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/esmaxwill/postbox/issues"
+  },
+  "homepage": "https://github.com/esmaxwill/postbox#readme",
+  "devDependencies": {
+    "serverless-domain-manager": "^6.2.0",
+    "serverless-python-requirements": "^6.0.0"
+  }
+}

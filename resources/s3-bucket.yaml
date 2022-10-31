@@ -1,0 +1,57 @@
+Resources:
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      BucketName: smaxwill-postbox-${opt:stage}
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+  DataBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DataBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "s3:PutObject"
+            Effect: Allow
+            Principal:
+              Service:
+                - ses.amazonaws.com
+            Condition:
+              StringEquals:
+                "aws:Referer": !Ref "AWS::AccountId"
+
+            Resource: !Join
+              - ""
+              - - "arn:aws:s3:::"
+                - !Ref DataBucket
+                - "/*"
+
+
+          - Action:
+              - "s3:*"
+            Effect: Allow
+            Resource: !Join
+              - ""
+              - - "arn:aws:s3:::"
+                - !Ref DataBucket
+                - "/*"
+            Principal:
+              AWS: !Join
+                - ""
+                - - "arn:aws:iam::"
+                  - !Ref "AWS::AccountId"
+                  - ":root"

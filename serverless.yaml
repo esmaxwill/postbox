@@ -1,0 +1,52 @@
+service: postbox
+
+custom:
+  customDomain:
+    domainName: ${self:custom.domain_name}
+    basePath: ""
+    stage: ${opt:stage, "test"}
+    createRoute53Record: true
+    certificateArn: ${self:custom.certificate_arn}
+    autoDomain: true
+    autoDomainWaitFor: 300
+
+  pythonRequirements:
+    dockerizePip: non-linux
+
+  stage: ${opt:stage, self:provider.stage}
+
+  domain_name: ${env:DOMAIN_NAME, 'postbox.smaxwill.com'}
+  certificate_arn: ${env:CERTIFICATE_ARN, 'postbox.smaxwill.com'}
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  timeout: 30
+  stage: test
+  endpointType: REGIONAL
+  tracing:
+    lambda: true
+
+  memorySize: 1536
+
+  environment:
+    PYTHON_PATH: "/var/run/task"
+    SENTRY_DSN: ${env:SENTRY_DSN}
+    SENTRY_RELEASE: ${env:SENTRY_RELEASE}
+    ENVIRONMENT: ${opt:stage, "test"}
+    DYNAMODB_TABLE_NAME: !Ref StdbTable
+    S3_BUCKET_NAME: !Ref DataBucket
+    AUTHORIZATION_ISSUERS: ${env:AUTHORIZATION_ISSUERS, ""}
+    AUTHORIZATION_REALMS: ${env:AUTHORIZATION_REALMS, ""}
+    AUTHORIZATION_AUDIENCE: ${env:AUTHORIZATION_AUDIENCE, ""}
+
+
+plugins:
+  - serverless-python-requirements
+  - serverless-domain-manager
+
+resources:
+  - ${file("./resources/dynamodb-table.yaml")}
+  - ${file("./resources/s3-bucket.yaml")}
+  - ${file("./resources/sns-topic.yaml")}
